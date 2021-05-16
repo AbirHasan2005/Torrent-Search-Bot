@@ -1,12 +1,17 @@
 # (c) @AbirHasan2005 & Jigar Varma
 
-from tpblite import TPB
+import py1337x
 import aiohttp
-from configs import Config
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, InlineQuery, InlineQueryResultArticle, \
+    InputTextMessageContent
+from tpblite import TPB
+
+from configs import Config
+from torrentx_handler import queryMessageContent
 
 TorrentBot = Client(session_name=Config.SESSION_NAME, api_id=Config.API_ID, api_hash=Config.API_HASH, bot_token=Config.BOT_TOKEN)
+torrentX = py1337x.py1337x()
 
 
 @TorrentBot.on_message(filters.command("start"))
@@ -85,7 +90,7 @@ async def inline_handlers(_, inline: InlineQuery):
                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!pts ")]])
                         )
                     )
-    else:
+    elif search_ts.startswith("!s"):
         try:
             async with aiohttp.ClientSession() as ses:
                 async with ses.get("https://api.sumanjay.cf/torrent/?query=" + search_ts) as r:
@@ -103,7 +108,7 @@ async def inline_handlers(_, inline: InlineQuery):
                                             message_text=f"\n\n**Name:** `{torrent[i]['name']}`\n**Size:** `{torrent[i]['size']}`\n**Seeders:** `{torrent[i]['seeder']}`\n**Leechers:** `{torrent[i]['leecher']}`\n\n`{torrent[i]['magnet']}`\n\nPowered By @AHToolsBot",
                                             parse_mode="Markdown"
                                         ),
-                                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="")]])
+                                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!s ")]])
                                     )
                                 )
                             except (IndexError, KeyError):
@@ -118,7 +123,7 @@ async def inline_handlers(_, inline: InlineQuery):
                                         parse_mode="Markdown"
                                     ),
                                     reply_markup=InlineKeyboardMarkup(
-                                        [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="")]])
+                                        [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!s ")]])
                                 )
                             )
                     except Exception as err:
@@ -132,7 +137,7 @@ async def inline_handlers(_, inline: InlineQuery):
                                     parse_mode="Markdown"
                                 ),
                                 reply_markup=InlineKeyboardMarkup(
-                                    [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="")]])
+                                    [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!s ")]])
                             )
                         )
         except Exception as err:
@@ -146,7 +151,25 @@ async def inline_handlers(_, inline: InlineQuery):
                         parse_mode="Markdown"
                     ),
                     reply_markup=InlineKeyboardMarkup(
-                        [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="")]])
+                        [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!s ")]])
+                )
+            )
+    else:
+        offset = int(inline.offset.split(':')[0]) if inline.offset else 0
+        page = int(inline.offset.split(':')[1]) if inline.offset else 1
+        results = torrentX.search(inline.query, page)
+        for count, item in enumerate(results['items'][offset:]):
+            if count >= 5:
+                break
+            answers.append(
+                InlineQueryResultArticle(
+                    title=f"{item['name']}",
+                    description=f"Seeders: {item['seeders']}, Leechers: {item['leechers']}\nSize: {item['size']}",
+                    input_message_content=InputTextMessageContent(
+                        message_text=queryMessageContent(torrentId=item['torrentId']),
+                        parse_mode="HTML",
+                        disable_web_page_preview=True
+                    )
                 )
             )
     await inline.answer(

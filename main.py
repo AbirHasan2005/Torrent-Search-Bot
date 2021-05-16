@@ -12,7 +12,7 @@ TorrentBot = Client(session_name=Config.SESSION_NAME, api_id=Config.API_ID, api_
 @TorrentBot.on_message(filters.command("start"))
 async def start_handler(_, message: Message):
     await message.reply_text(
-        text="Hello, I am Torrent Search Bot!\nI can search Torrent Magnetic Link from Inline.\n\nMade by @AbirHasan2005",
+        text="Hello, I am Torrent Search Bot!\nI can search Torrent Magnetic Link from Inline.\n\nMade by @sayan_admin",
         disable_web_page_preview=True,
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(
@@ -21,9 +21,7 @@ async def start_handler(_, message: Message):
                  InlineKeyboardButton("Go Inline", switch_inline_query="")],
                 [InlineKeyboardButton("Search ThePirateBay", switch_inline_query_current_chat="!pts "),
                  InlineKeyboardButton("Go Inline", switch_inline_query="!pts ")],
-                [InlineKeyboardButton("Developer: @AbirHasan2005", url="https://t.me/AbirHasan2005")]
-            ]
-        )
+                
     )
 
 

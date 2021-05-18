@@ -6,6 +6,7 @@ A Simple Telegram Inline Torrent Search Bot by [@AbirHasan2005](https://github.c
 ## Torrent APIs
 - Using [api.sumanjay.cf](https://api.sumanjay.cf/) API
 - Using [tpblite](https://pypi.org/project/tpblite/) Python Module
+- Using [1337x](https://pypi.org/project/1337x/) Pythom Module
 
 ## Host Bot
 ### Deploy to Heroku

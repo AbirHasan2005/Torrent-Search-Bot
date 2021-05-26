@@ -1,4 +1,4 @@
-# (c) @AbirHasan2005 & Jigar Varma & Hemanta Pokharel & The Anon Cat
+# (c) @AbirHasan2005 & Jigar Varma & Hemanta Pokharel & Akib Hridoy
 
 import py1337x
 import aiohttp
@@ -159,7 +159,7 @@ async def inline_handlers(_, inline: InlineQuery):
                 )
             )
     else:
-        # Coded by Hemanta Pokharel, The Anon Cat
+        # Coded by Hemanta Pokharel, Akib Hridoy
         # Re-Coded by @AbirHasan2005
         torrentX = py1337x.py1337x()
         offset = int(inline.offset.split(':')[0]) if inline.offset else 0

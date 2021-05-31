@@ -179,7 +179,7 @@ async def inline_handlers(_, inline: InlineQuery):
                         parse_mode="HTML",
                         disable_web_page_preview=True
                     ),
-                    thumb_url=info['image'],
+                    thumb_url=info['thumbnail'],
                     reply_markup=InlineKeyboardMarkup(
                         [
                             [InlineKeyboardButton("Search Again", switch_inline_query_current_chat="")]

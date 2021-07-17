@@ -1,37 +1,43 @@
 # (c) @AbirHasan2005 & Jigar Varma & Hemanta Pokharel & Akib Hridoy
 
-import py1337x
-import aiohttp
+import asyncio
 from pyrogram import Client, filters
-from pyrogram.errors import QueryIdInvalid
+from pyrogram.errors import QueryIdInvalid, FloodWait
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, InlineQuery, InlineQueryResultArticle, \
     InputTextMessageContent
-from tpblite import TPB
 
 from configs import Config
-from torrentx_handler import queryMessageContent
+from tool import SearchYTS, SearchAnime, Search1337x, SearchPirateBay
 
 TorrentBot = Client(session_name=Config.SESSION_NAME, api_id=Config.API_ID, api_hash=Config.API_HASH, bot_token=Config.BOT_TOKEN)
+DEFAULT_SEARCH_MARKUP = [
+                    [InlineKeyboardButton("Search YTS", switch_inline_query_current_chat="!yts "),
+                     InlineKeyboardButton("Go Inline", switch_inline_query="!yts ")],
+                    [InlineKeyboardButton("Search ThePirateBay", switch_inline_query_current_chat="!pb "),
+                     InlineKeyboardButton("Go Inline", switch_inline_query="!pb ")],
+                    [InlineKeyboardButton("Search 1337x", switch_inline_query_current_chat=""),
+                     InlineKeyboardButton("Go Inline", switch_inline_query="")],
+                    [InlineKeyboardButton("Search Anime", switch_inline_query_current_chat="!a "),
+                     InlineKeyboardButton("GO Inline", switch_inline_query_current_chat="!a ")],
+                    [InlineKeyboardButton("Developer: @AbirHasan2005", url="https://t.me/AbirHasan2005")]
+                ]
 
 
 @TorrentBot.on_message(filters.command("start"))
 async def start_handler(_, message: Message):
-    await message.reply_text(
-        text="Hello, I am Torrent Search Bot!\nI can search Torrent Magnetic Link from Inline.\n\nMade by @AbirHasan2005",
-        disable_web_page_preview=True,
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("Search Torrents", switch_inline_query_current_chat="!s "),
-                 InlineKeyboardButton("Go Inline", switch_inline_query="!s ")],
-                [InlineKeyboardButton("Search ThePirateBay", switch_inline_query_current_chat="!pts "),
-                 InlineKeyboardButton("Go Inline", switch_inline_query="!pts ")],
-                [InlineKeyboardButton("Search 1337x", switch_inline_query_current_chat=""),
-                 InlineKeyboardButton("Go Inline", switch_inline_query="")],
-                [InlineKeyboardButton("Developer: @AbirHasan2005", url="https://t.me/AbirHasan2005")]
-            ]
+    try:
+        await message.reply_text(
+            text="Hello, I am Torrent Search Bot!\n"
+                 "I can search Torrent Magnetic Links from Inline.\n\n"
+                 "Made by @AbirHasan2005",
+            disable_web_page_preview=True,
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(DEFAULT_SEARCH_MARKUP)
         )
-    )
+    except FloodWait as e:
+        print(f"[{Config.SESSION_NAME}] - Sleeping for {e.x}s")
+        await asyncio.sleep(e.x)
+        await start_handler(_, message)
 
 
 @TorrentBot.on_inline_query()
@@ -47,105 +53,164 @@ async def inline_handlers(_, inline: InlineQuery):
                     message_text="Search for Torrents from Inline!",
                     parse_mode="Markdown"
                 ),
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Search Torrents", switch_inline_query_current_chat="")]])
+                reply_markup=InlineKeyboardMarkup(DEFAULT_SEARCH_MARKUP)
             )
         )
-    elif search_ts.startswith("!pts"):
-        # Coded by @AbirHasan2005 & Jigar Varma
-        jv = search_ts.split(" ", 1)[-1]
-        if jv == "":
+    elif search_ts.startswith("!pb"):
+        query = search_ts.split(" ", 1)[-1]
+        if (query == "") or (query == " "):
             answers.append(
                 InlineQueryResultArticle(
-                    title="!pts [text]",
-                    description="Search For Torrent in pirate bay ...",
+                    title="!pb [text]",
+                    description="Search For Torrent in ThePirateBay ...",
                     input_message_content=InputTextMessageContent(
-                        message_text="`!pts [text]`\n\nSearch Pirate Bay Torrents from Inline!",
+                        message_text="`!pb [text]`\n\nSearch ThePirateBay Torrents from Inline!",
                         parse_mode="Markdown"
                     ),
-                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!pts ")]])
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!pb ")]])
                 )
             )
         else:
-            j_v = TPB()
-            torrentList = j_v.search(jv)
-            for torrent in torrentList:
-                name_tor = torrent.title
+            torrentList = await SearchPirateBay(query)
+            if not torrentList:
                 answers.append(
                     InlineQueryResultArticle(
-                        title=f"{name_tor}",
-                        description=f"Seeders: {torrent.seeds}, Leechers: {torrent.leeches}\nSize: {torrent.filesize}",
+                        title="No Torrents Found in ThePirateBay!",
+                        description=f"Can't find torrents for {query} in ThePirateBay !!",
                         input_message_content=InputTextMessageContent(
-                            message_text=f"\n\n**Name:** {torrent.title}\n**Size:** {torrent.filesize}\n**Seeders:** {torrent.seeds}\n**Leechers:** {torrent.leeches}\n\n`{torrent.magnetlink}`\n\nPowered By @AHToolsBot",
+                            message_text=f"No Torrents Found For `{query}` in ThePirateBay !!",
                             parse_mode="Markdown"
                         ),
-                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!pts ")]])
+                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!pb ")]])
                     )
                 )
-                if name_tor == "":
+            else:
+                for i in range(len(torrentList)):
                     answers.append(
                         InlineQueryResultArticle(
-                            title="No Torrents Found in Pirate bay !",
-                            description=f"Can't find torrents for {search_ts} in Pirate bay !!",
+                            title=f"{torrentList[i]['Name']}",
+                            description=f"Seeders: {torrentList[i]['Seeders']}, Leechers: {torrentList[i]['Leechers']}\nSize: {torrentList[i]['Size']}",
                             input_message_content=InputTextMessageContent(
-                                message_text=f"No Torrents Found For `{search_ts}` in Pirate bay !!",
+                                message_text=f"**Category:** `{torrentList[i]['Category']}`\n"
+                                             f"**Name:** `{torrentList[i]['Seeders']}`\n"
+                                             f"**Size:** `{torrentList[i]['Size']}`\n"
+                                             f"**Seeders:** `{torrentList[i]['Seeders']}`\n"
+                                             f"**Leechers:** `{torrentList[i]['Leechers']}`\n"
+                                             f"**Uploader:** `{torrentList[i]['Uploader']}`\n"
+                                             f"**Uploaded on {torrentList[i]['Date']}**\n\n"
+                                             f"**Magnet:**\n`{torrentList[i]['Magnet']}`\n\nPowered By @AHToolsBot",
                                 parse_mode="Markdown"
                             ),
-                            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!pts ")]])
+                            reply_markup=InlineKeyboardMarkup(
+                                [[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!pb ")]])
                         )
                     )
-    elif search_ts.startswith("!s"):
-        # Coded by @AbirHasan2005
-        try:
-            async with aiohttp.ClientSession() as ses:
-                async with ses.get("https://api.sumanjay.cf/torrent/?query=" + search_ts.split(" ", 1)[-1]) as r:
-                    try:
-                        torrent = await r.json()
-                        name_tor = ""
-                        for i in range(Config.MAX_INLINE_RESULTS):
-                            try:
-                                name_tor = torrent[i]['name']
-                                answers.append(
-                                    InlineQueryResultArticle(
-                                        title=f"{name_tor}",
-                                        description=f"Seeders: {torrent[i]['seeder']}, Leechers: {torrent[i]['leecher']}\nSize: {torrent[i]['size']}",
-                                        input_message_content=InputTextMessageContent(
-                                            message_text=f"\n\n**Name:** `{torrent[i]['name']}`\n**Size:** `{torrent[i]['size']}`\n**Seeders:** `{torrent[i]['seeder']}`\n**Leechers:** `{torrent[i]['leecher']}`\n\n`{torrent[i]['magnet']}`\n\nPowered By @AHToolsBot",
-                                            parse_mode="Markdown"
-                                        ),
-                                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!s ")]])
-                                    )
-                                )
-                            except (IndexError, KeyError):
-                                break
-                        if name_tor == "":
-                            answers.append(
-                                InlineQueryResultArticle(
-                                    title="No Torrents Found!",
-                                    description=f"Can't find torrents for {search_ts} !!",
-                                    input_message_content=InputTextMessageContent(
-                                        message_text=f"No Torrents Found For `{search_ts}`",
-                                        parse_mode="Markdown"
-                                    ),
-                                    reply_markup=InlineKeyboardMarkup(
-                                        [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!s ")]])
-                                )
-                            )
-                    except Exception as err:
-                        print(f"Error: {err}")
-                        answers.append(
-                            InlineQueryResultArticle(
-                                title="No Torrents Found!",
-                                description=f"Can't find torrents for {search_ts} !!",
-                                input_message_content=InputTextMessageContent(
-                                    message_text=f"No Torrents Found For `{search_ts}`",
-                                    parse_mode="Markdown"
-                                ),
-                                reply_markup=InlineKeyboardMarkup(
-                                    [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!s ")]])
+    elif search_ts.startswith("!yts"):
+        query = search_ts.split(" ", 1)[-1]
+        if (query == "") or (query == " "):
+            answers.append(
+                InlineQueryResultArticle(
+                    title="!yts [text]",
+                    description="Search For Torrent in YTS ...",
+                    input_message_content=InputTextMessageContent(
+                        message_text="`!yts [text]`\n\nSearch YTS Torrents from Inline!",
+                        parse_mode="Markdown"
+                    ),
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!yts ")]])
+                )
+            )
+        else:
+            torrentList = await SearchYTS(query)
+            if not torrentList:
+                answers.append(
+                    InlineQueryResultArticle(
+                        title="No Torrents Found!",
+                        description=f"Can't find YTS torrents for {query} !!",
+                        input_message_content=InputTextMessageContent(
+                            message_text=f"No YTS Torrents Found For `{query}`",
+                            parse_mode="Markdown"
+                        ),
+                        reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!yts ")]])
+                    )
+                )
+            else:
+                for i in range(len(torrentList)):
+                    dl_links = "- " + "\n\n- ".join(torrentList[i]['Downloads'])
+                    answers.append(
+                        InlineQueryResultArticle(
+                            title=f"{torrentList[i]['Name']}",
+                            description=f"Language: {torrentList[i]['Language']}\nLikes: {torrentList[i]['Likes']}, Rating: {torrentList[i]['Rating']}",
+                            input_message_content=InputTextMessageContent(
+                                message_text=f"**Genre:** `{torrentList[i]['Genre']}`\n"
+                                             f"**Name:** `{torrentList[i]['Name']}`\n"
+                                             f"**Language:** `{torrentList[i]['Language']}`\n"
+                                             f"**Likes:** `{torrentList[i]['Likes']}`, **Rating:** `{torrentList[i]['Rating']}`\n"
+                                             f"**Duration:** `{torrentList[i]['Runtime']}`\n"
+                                             f"**Released on {torrentList[i]['ReleaseDate']}**\n\n"
+                                             f"**Download Links:**\n{dl_links}\nPowered By @AHToolsBot",
+                                parse_mode="Markdown",
+                                disable_web_page_preview=True
+                            ),
+                            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!yts ")]]),
+                            thumb_url=torrentList[i]["Poster"]
+                        )
+                    )
+    elif search_ts.startswith("!a"):
+        query = search_ts.split(" ", 1)[-1]
+        if (query == "") or (query == " "):
+            answers.append(
+                InlineQueryResultArticle(
+                    title="!a [text]",
+                    description="Search For Torrents for Anime ...",
+                    input_message_content=InputTextMessageContent(
+                        message_text="`!a [text]`\n\nSearch Anime Torrents from Inline!",
+                        parse_mode="Markdown"
+                    ),
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!a ")]])
+                )
+            )
+        else:
+            torrentList = await SearchAnime(query)
+            if not torrentList:
+                answers.append(
+                    InlineQueryResultArticle(
+                        title="No Anime Torrents Found!",
+                        description=f"Can't find Anime torrents for {query} !!",
+                        input_message_content=InputTextMessageContent(
+                            message_text=f"No Anime Torrents Found For `{query}`",
+                            parse_mode="Markdown"
+                        ),
+                        reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!a ")]])
+                    )
+                )
+            else:
+                for i in range(len(torrentList)):
+                    answers.append(
+                        InlineQueryResultArticle(
+                            title=f"{torrentList[i]['Name']}",
+                            description=f"Seeders: {torrentList[i]['Seeder']}, Leechers: {torrentList[i]['Leecher']}\nSize: {torrentList[i]['Size']}",
+                            input_message_content=InputTextMessageContent(
+                                message_text=f"**Category:** `{torrentList[i]['Category']}`\n"
+                                             f"**Name:** `{torrentList[i]['Name']}`\n"
+                                             f"**Seeders:** `{torrentList[i]['Seeder']}`\n"
+                                             f"**Leechers:** `{torrentList[i]['Leecher']}`\n"
+                                             f"**Size:** `{torrentList[i]['Size']}`\n"
+                                             f"**Upload Date:** `{torrentList[i]['Date']}`\n\n"
+                                             f"**Magnet:** \n`{torrentList[i]['Magnet']}`\n\nPowered By @AHToolsBot",
+                                parse_mode="Markdown"
+                            ),
+                            reply_markup=InlineKeyboardMarkup(
+                                [[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="!a ")]]
                             )
                         )
-        except Exception as err:
-            print(f"Error: {err}")
+                    )
+    else:
+        torrentList = await Search1337x(search_ts)
+        if not torrentList:
             answers.append(
                 InlineQueryResultArticle(
                     title="No Torrents Found!",
@@ -155,50 +220,54 @@ async def inline_handlers(_, inline: InlineQuery):
                         parse_mode="Markdown"
                     ),
                     reply_markup=InlineKeyboardMarkup(
-                        [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="!s ")]])
+                        [[InlineKeyboardButton("Try Again", switch_inline_query_current_chat="")]])
                 )
             )
-    else:
-        # Coded by Hemanta Pokharel, Akib Hridoy
-        # Re-Coded by @AbirHasan2005
-        torrentX = py1337x.py1337x()
-        offset = int(inline.offset.split(':')[0]) if inline.offset else 0
-        page = int(inline.offset.split(':')[1]) if inline.offset else 1
-        results = torrentX.search(inline.query, page)
-        for count, item in enumerate(results['items'][offset:]):
-            if count >= 5:
-                break
-
-            info = torrentX.info(link=item['link'])
-            answers.append(
-                InlineQueryResultArticle(
-                    title=f"{item['name']}",
-                    description=f"Seeders: {item['seeders']}, Leechers: {item['leechers']}\nSize: {item['size']}",
-                    input_message_content=InputTextMessageContent(
-                        message_text=queryMessageContent(torrentId=item['torrentId']),
-                        parse_mode="HTML",
-                        disable_web_page_preview=True
-                    ),
-                    thumb_url=info['thumbnail'],
-                    reply_markup=InlineKeyboardMarkup(
-                        [
-                            [InlineKeyboardButton("Search Again", switch_inline_query_current_chat="")]
-                        ]
+        else:
+            for i in range(len(torrentList)):
+                answers.append(
+                    InlineQueryResultArticle(
+                        title=f"{torrentList[i]['Name']}",
+                        description=f"Seeders: {torrentList[i]['Seeders']}, Leechers: {torrentList[i]['Leechers']}\nSize: {torrentList[i]['Size']}, Downloads: {torrentList[i]['Downloads']}",
+                        input_message_content=InputTextMessageContent(
+                            message_text=f"**Category:** `{torrentList[i]['Category']}`\n"
+                                         f"**Name:** `{torrentList[i]['Name']}`\n"
+                                         f"**Language:** `{torrentList[i]['Language']}`\n"
+                                         f"**Seeders:** `{torrentList[i]['Seeders']}`\n"
+                                         f"**Leechers:** `{torrentList[i]['Leechers']}`\n"
+                                         f"**Size:** `{torrentList[i]['Size']}`\n"
+                                         f"**Downloads:** `{torrentList[i]['Downloads']}`\n"
+                                         f"__Uploaded by {torrentList[i]['UploadedBy']}__\n"
+                                         f"__Uploaded {torrentList[i]['DateUploaded']}__\n"
+                                         f"__Last Checked {torrentList[i]['LastChecked']}__\n\n"
+                                         f"**Magnet:**\n`{torrentList[i]['Magnet']}`\n\nPowered By @AHToolsBot",
+                            parse_mode="Markdown"
+                        ),
+                        reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton("Search Again", switch_inline_query_current_chat="")]]
+                        ),
+                        thumb_url=torrentList[i]['Poster']
                     )
                 )
-            )
     try:
         await inline.answer(
             results=answers,
             cache_time=0
         )
+        print(f"[{Config.SESSION_NAME}] - Answered Successfully - {inline.from_user.first_name}")
     except QueryIdInvalid:
-        await inline.answer(
-            results=answers,
-            cache_time=0,
-            switch_pm_text="Error: Search timed out!",
-            switch_pm_parameter="start",
-        )
+        print(f"[{Config.SESSION_NAME}] - Failed to Answer - {inline.from_user.first_name} - Sleeping for 5s")
+        await asyncio.sleep(5)
+        try:
+            await inline.answer(
+                results=answers,
+                cache_time=0,
+                switch_pm_text="Error: Search timed out!",
+                switch_pm_parameter="start",
+            )
+        except QueryIdInvalid:
+            print(f"[{Config.SESSION_NAME}] - Failed to Answer Error - {inline.from_user.first_name} - Sleeping for 5s")
+            await asyncio.sleep(5)
 
 
 TorrentBot.run()

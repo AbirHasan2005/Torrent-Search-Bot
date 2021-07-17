@@ -1,5 +1,4 @@
 pyrogram
 TgCrypto
 aiohttp
-tpblite
-1337x
+requests

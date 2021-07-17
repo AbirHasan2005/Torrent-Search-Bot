@@ -146,10 +146,11 @@ async def inline_handlers(_, inline: InlineQuery):
                                 message_text=f"**Genre:** `{torrentList[i]['Genre']}`\n"
                                              f"**Name:** `{torrentList[i]['Name']}`\n"
                                              f"**Language:** `{torrentList[i]['Language']}`\n"
-                                             f"**Likes:** `{torrentList[i]['Likes']}`, **Rating:** `{torrentList[i]['Rating']}`\n"
+                                             f"**Likes:** `{torrentList[i]['Likes']}`\n"
+                                             f"**Rating:** `{torrentList[i]['Rating']}`\n"
                                              f"**Duration:** `{torrentList[i]['Runtime']}`\n"
                                              f"**Released on {torrentList[i]['ReleaseDate']}**\n\n"
-                                             f"**Download Links:**\n{dl_links}\nPowered By @AHToolsBot",
+                                             f"**Torrent Download Links:**\n{dl_links}\n\nPowered By @AHToolsBot",
                                 parse_mode="Markdown",
                                 disable_web_page_preview=True
                             ),

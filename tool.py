@@ -1,4 +1,5 @@
-# (c) @AbirHasan2005 & Hemanta Pokharel & The Anon Cat
+# (c) @AbirHasan2005
+# Scrappers
 
 import aiohttp
 from configs import Config

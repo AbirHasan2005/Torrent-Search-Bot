@@ -1,5 +1,4 @@
 # Torrent-Search-Bot
-This branch in Development! Don't deploy now!
 
 A Simple Telegram Inline Torrent Search Bot by [@AbirHasan2005](https://github.com/AbirHasan2005).
 

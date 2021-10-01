@@ -19,7 +19,7 @@ DEFAULT_SEARCH_MARKUP = [
                      InlineKeyboardButton("Go Inline", switch_inline_query="")],
                     [InlineKeyboardButton("Search Anime", switch_inline_query_current_chat="!a "),
                      InlineKeyboardButton("GO Inline", switch_inline_query_current_chat="!a ")],
-                    [InlineKeyboardButton("Developer: @AbirHasan2005", url="https://t.me/AbirHasan2005")]
+                    [InlineKeyboardButton("Developer: @꧁࿗༒⚔𝐌𝐫 ℙℝ𝕆𝔽𝔼𝕊𝕆ℝ⚔༒࿗꧂:", url="https://t.me/N_A_V_I_P_A_V_I/")]
                 ]
 
 
@@ -27,9 +27,18 @@ DEFAULT_SEARCH_MARKUP = [
 async def start_handler(_, message: Message):
     try:
         await message.reply_text(
-            text="Hello, I am Torrent Search Bot!\n"
-                 "I can search Torrent Magnetic Links from Inline.\n\n"
-                 "Made by @AbirHasan2005",
+            text="HELLO, I AM PRO TORRENT SEARCHER BOT...
+
+YOU CAN SEARCH ANY MOVIES HERE & WAIT JUST 5 SECOND..
+YOU WILL GET LINK
+
+UPDATES CHANNEL 👉 @BANDU_PROJECT
+
+DEVOLOPER 👉@N_A_V_I_P_A_V_I &@BANDU_OF_TG
+
+Support group 👉@BANDU_SUPPORT
+        
+",
             disable_web_page_preview=True,
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(DEFAULT_SEARCH_MARKUP)

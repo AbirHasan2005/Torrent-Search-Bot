@@ -9,8 +9,7 @@ A Simple Telegram Inline Torrent Search Bot by [@AbirHasan2005](https://github.c
 ### Deploy to Heroku
 Click Below Button to Deploy to Heroku:
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/AbirHasan2005/Torrent-Search-Bot)
-
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/MrProfessor999/Torrent-Search-Bot)
 ### Deploy Locally
 ```shell
 git clone https://github.com/AbirHasan2005/Torrent-Search-Bot

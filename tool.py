@@ -5,10 +5,10 @@ import aiohttp
 from configs import Config
 from requests.utils import requote_uri
 
-API_1337x = "https://api.abirhasan.wtf/1337x?query={}&limit={}"
-API_YTS = "https://api.abirhasan.wtf/yts?query={}&limit={}"
-API_PIRATEBAY = "https://api.abirhasan.wtf/piratebay?query={}&limit={}"
-API_ANIME = "https://api.abirhasan.wtf/anime?query={}&limit={}"
+API_1337x = "https://api.abir-hasan.tk/1337x?query={}&limit={}"
+API_YTS = "https://api.abir-hasan.tk/yts?query={}&limit={}"
+API_PIRATEBAY = "https://api.abir-hasan.tk/piratebay?query={}&limit={}"
+API_ANIME = "https://api.abir-hasan.tk/anime?query={}&limit={}"
 
 
 async def Search1337x(query: str):
